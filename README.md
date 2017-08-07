@@ -65,7 +65,7 @@ Queue: 1(Up), 2(Down)
 It means:
 
 - There are 3 elevators in the system.
-- 1st elevator is on 4th floor. Then it will go to 9th floor and then down.
+- 1st elevator is on the 4th floor. Then it will go to the 9th floor and then down.
 - 2nd elevator is on the 5th floor. It just arrived there and is idle for one time step. Then it 
 should go up.
 - 3rd elevator is on the 8th floor. It's ready to accept new goals.
