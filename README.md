@@ -33,7 +33,7 @@ To find the most suitable elevator we compute suitability function for every (el
 request) pair (see `ElevatorState.suitability`). Elevator is suitable for a request only if the 
 request is within its known trajectory, then 
 `Suitability = Number_of_floors - Distance(Request_floor, Elevator_floor)`. Elevator with the 
- highest suitability gets the request; if no elevator is suitable, requests stays in the queue 
+ highest suitability gets the request; if no elevator is suitable, request stays in the queue 
  until the next state update.
 
 
