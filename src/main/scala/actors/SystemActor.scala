@@ -29,7 +29,7 @@ class SystemActor(numElevators: Int, numFloors: Int) extends Actor {
     id -> ElevatorState(id)
   }.toMap
 
-  /** IDs of elevators that haven't receive any request after their last state update. */
+  /** IDs of elevators that haven't received any request after their last state update. */
   private var elevatorsUpdated: Set[Int] = elevatorsState.keySet
 
   /** Queue of pickup requests. */

@@ -111,7 +111,7 @@ class ElevatorStateTest extends WordSpec with Matchers {
       es.addGoal(10, None) should be(target)
     }
 
-    "update last direction if directed" in {
+    "update last direction if inserted" in {
       val es = s0.copy(goals = Seq(5, 10, 3), lastDirection = Some(Down))
       val target = es.copy(goals = Seq(5, 10, 3, 11), lastDirection = Some(Up))
       es.addGoal(11, Some(Up)) should be(target)
@@ -128,7 +128,6 @@ class ElevatorStateTest extends WordSpec with Matchers {
       val es = s0.copy(floor = 3, goals = Seq(5), lastDirection = Some(Up), arrived = false)
       es.suitability(2, Up, 10) should be(None)
     }
-
 
     "be None if is moving away from target (down)" in {
       val es = s0.copy(floor = 6, goals = Seq(5), lastDirection = Some(Up), arrived = false)
