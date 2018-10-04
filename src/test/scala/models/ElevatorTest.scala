@@ -1,16 +1,16 @@
-package model
+package models
 
-import model.Directions.{Down, Up}
+import models.Directions.{Down, Up}
 import org.scalatest._
 
+class ElevatorTest extends WordSpec with Matchers {
 
-class ElevatorStateTest extends WordSpec with Matchers {
-
-  val s0 = ElevatorState(id = 0)
+  val s0 = Elevator(id = 0)
 
   "Directions" should {
     "be correctly calculated for goals trajectory" in {
-      ElevatorState.directions(1, Seq(6, 2, 7, 12, 11)) should be(Seq(Up, Down, Up, Up, Down))
+      Elevator.directions(1, Seq(6, 2, 7, 12, 11)) should be(
+        Seq(Up, Down, Up, Up, Down))
     }
   }
 
@@ -50,7 +50,8 @@ class ElevatorStateTest extends WordSpec with Matchers {
 
   "On next step" should {
     "stay still if there are no goals" in {
-      val es = s0.copy(goals = Seq.empty, lastDirection = Some(Down), arrived = true)
+      val es =
+        s0.copy(goals = Seq.empty, lastDirection = Some(Down), arrived = true)
       val target = es.copy(lastDirection = None, arrived = false)
       es.next() should be(target)
     }
@@ -80,13 +81,17 @@ class ElevatorStateTest extends WordSpec with Matchers {
     }
 
     "wipe out `lastDirection` when there're no goals" in {
-      val es = s0.copy(goals = Seq(), arrived = false, lastDirection = Some(Down))
+      val es =
+        s0.copy(goals = Seq(), arrived = false, lastDirection = Some(Down))
       val target = es.copy(lastDirection = None)
       es.next() should be(target)
     }
 
     "not wipe out `lastDirection` when just arrived to the goal floor" in {
-      val es = s0.copy(floor = 1, goals = Seq(1), arrived = true, lastDirection = Some(Down))
+      val es = s0.copy(floor = 1,
+                       goals = Seq(1),
+                       arrived = true,
+                       lastDirection = Some(Down))
       val target = es.copy()
       es.next() should be(target)
     }
@@ -100,7 +105,8 @@ class ElevatorStateTest extends WordSpec with Matchers {
     }
 
     "be after the current trajectory if not possible to fit it in" in {
-      val es = s0.copy(floor = 4, goals = Seq(5, 10, 3), lastDirection = Some(Up))
+      val es =
+        s0.copy(floor = 4, goals = Seq(5, 10, 3), lastDirection = Some(Up))
       val target = es.copy(goals = Seq(5, 10, 3, 11))
       es.addGoal(11, None) should be(target)
     }
@@ -125,17 +131,26 @@ class ElevatorStateTest extends WordSpec with Matchers {
     }
 
     "be None if is moving away from target (up)" in {
-      val es = s0.copy(floor = 3, goals = Seq(5), lastDirection = Some(Up), arrived = false)
+      val es = s0.copy(floor = 3,
+                       goals = Seq(5),
+                       lastDirection = Some(Up),
+                       arrived = false)
       es.suitability(2, Up, 10) should be(None)
     }
 
     "be None if is moving away from target (down)" in {
-      val es = s0.copy(floor = 6, goals = Seq(5), lastDirection = Some(Up), arrived = false)
+      val es = s0.copy(floor = 6,
+                       goals = Seq(5),
+                       lastDirection = Some(Up),
+                       arrived = false)
       es.suitability(7, Up, 10) should be(None)
     }
 
     "be None if is going to change direction" in {
-      val es = s0.copy(floor = 7, goals = Seq(5), lastDirection = Some(Up), arrived = false)
+      val es = s0.copy(floor = 7,
+                       goals = Seq(5),
+                       lastDirection = Some(Up),
+                       arrived = false)
       es.suitability(6, Down, 10) should be(None)
     }
 
@@ -156,5 +171,3 @@ class ElevatorStateTest extends WordSpec with Matchers {
   }
 
 }
-
-

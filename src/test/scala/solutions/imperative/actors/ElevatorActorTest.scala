@@ -1,15 +1,18 @@
-package actors
+package solutions.imperative.actors
 
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
-import model.Directions.Up
-import model.ElevatorState
-import model.Messages._
+import models.Directions.Up
+import models.{Elevator, _}
 import org.scalatest._
+import solutions.imperative.messages.{ElevatorStatusRequest, ElevatorStatusUpdate}
 
-
-class ElevatorActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-  with WordSpecLike with Matchers with BeforeAndAfterAll {
+class ElevatorActorTest(_system: ActorSystem)
+    extends TestKit(_system)
+    with ImplicitSender
+    with WordSpecLike
+    with Matchers
+    with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("ElevatorActorTest"))
 
@@ -21,25 +24,27 @@ class ElevatorActorTest(_system: ActorSystem) extends TestKit(_system) with Impl
     "send `ElevatorStatusUpdate` on `ElevatorStatusRequest`" in {
       val elevator = system.actorOf(Props(new ElevatorActor(0)))
       elevator ! ElevatorStatusRequest
-      expectMsg(ElevatorStatusUpdate(ElevatorState(0)))
+      expectMsg(ElevatorStatusUpdate(Elevator(0)))
     }
 
     "add goal on `PickupRequest`" in {
       val elevator = system.actorOf(Props(new ElevatorActor(0)))
       elevator ! PickupRequest(2, Up)
-      expectMsg(ElevatorStatusUpdate(
-        ElevatorState(0, goals = Seq(2), lastDirection = Some(Up))))
+      expectMsg(
+        ElevatorStatusUpdate(
+          Elevator(0, goals = Seq(2), lastDirection = Some(Up))))
     }
 
     "add goal on `FloorRequest`" in {
       val elevator = system.actorOf(Props(new ElevatorActor(0)))
       elevator ! FloorRequest(0, 3)
-      expectMsg(ElevatorStatusUpdate(
-        ElevatorState(0, goals = Seq(3), lastDirection = Some(Up))))
+      expectMsg(
+        ElevatorStatusUpdate(
+          Elevator(0, goals = Seq(3), lastDirection = Some(Up))))
     }
 
     "update state on `Step`" in {
-      val es = ElevatorState(0, goals = Seq(3), lastDirection = Some(Up))
+      val es = Elevator(0, goals = Seq(3), lastDirection = Some(Up))
       val elevator = system.actorOf(Props(new ElevatorActor(es)))
       elevator ! Step
       expectMsg(ElevatorStatusUpdate(es.copy(floor = 1)))
@@ -47,5 +52,3 @@ class ElevatorActorTest(_system: ActorSystem) extends TestKit(_system) with Impl
   }
 
 }
-
-

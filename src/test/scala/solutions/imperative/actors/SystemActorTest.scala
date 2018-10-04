@@ -1,20 +1,23 @@
-package actors
+package solutions.imperative.actors
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern._
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
-import model.Directions.{Down, Up}
-import model.Messages._
-import model._
+import models.Directions.{Down, Up}
+import models.{Elevator, _}
 import org.scalatest._
+import solutions.imperative.messages.{SystemStatusRequest, SystemStatusResponse}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-
-class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-  with WordSpecLike with Matchers with BeforeAndAfterAll {
+class SystemActorTest(_system: ActorSystem)
+    extends TestKit(_system)
+    with ImplicitSender
+    with WordSpecLike
+    with Matchers
+    with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("SystemActorTest"))
 
@@ -22,7 +25,8 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
     system.terminate()
   }
 
-  private def systemActor(x: Int, y: Int) = system.actorOf(Props(new SystemActor(x, y)))
+  private def systemActor(x: Int, y: Int) =
+    system.actorOf(Props(new SystemActor(x, y)))
 
   private def doSteps(actor: ActorRef, n: Int) = {
     for (i <- 0 until n) {
@@ -36,7 +40,7 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
     "send `SystemStatusResponse` on `SystemStatusRequest`" in {
       val elevatorSystem = systemActor(2, 10)
       elevatorSystem ! SystemStatusRequest
-      expectMsg(SystemStatusResponse(Seq(ElevatorState(1), ElevatorState(2)), Seq.empty))
+      expectMsg(SystemStatusResponse(Seq(Elevator(1), Elevator(2)), Seq.empty))
     }
 
     "accept `FloorRequest`" in {
@@ -45,7 +49,8 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
       actor ! FloorRequest(1, 1)
       Thread.sleep(100)
 
-      val ssr = Await.result(actor ? SystemStatusRequest, timeout.duration)
+      val ssr = Await
+        .result(actor ? SystemStatusRequest, timeout.duration)
         .asInstanceOf[SystemStatusResponse]
 
       ssr.elevatorStates.count(_.goals == Seq(1)) should be(1)
@@ -66,7 +71,8 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
       actor ! PickupRequest(1, Up)
       Thread.sleep(100)
 
-      val ssr = Await.result(actor ? SystemStatusRequest, timeout.duration)
+      val ssr = Await
+        .result(actor ? SystemStatusRequest, timeout.duration)
         .asInstanceOf[SystemStatusResponse]
 
       ssr.elevatorStates.count(_.goals == Seq(1)) should be(1)
@@ -89,7 +95,8 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
       actor ! PickupRequest(3, Up)
       Thread.sleep(100)
 
-      val ssr = Await.result(actor ? SystemStatusRequest, timeout.duration)
+      val ssr = Await
+        .result(actor ? SystemStatusRequest, timeout.duration)
         .asInstanceOf[SystemStatusResponse]
 
       ssr.elevatorStates.count(_.goals == Seq(1)) should be(1)
@@ -115,7 +122,8 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
       actor ! PickupRequest(4, Down)
       Thread.sleep(100)
 
-      val ssr = Await.result(actor ? SystemStatusRequest, timeout.duration)
+      val ssr = Await
+        .result(actor ? SystemStatusRequest, timeout.duration)
         .asInstanceOf[SystemStatusResponse]
 
       ssr.elevatorStates.count(_.goals == Seq(1)) should be(1)
@@ -154,7 +162,8 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
       doSteps(actor, 2)
       Thread.sleep(100)
 
-      val ssr = Await.result(actor ? SystemStatusRequest, timeout.duration)
+      val ssr = Await
+        .result(actor ? SystemStatusRequest, timeout.duration)
         .asInstanceOf[SystemStatusResponse]
 
       ssr.elevatorStates.count(_.goals == Seq(4)) should be(1)
@@ -182,7 +191,8 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
       actor ! PickupRequest(5, Up)
       Thread.sleep(100)
 
-      val ssr = Await.result(actor ? SystemStatusRequest, timeout.duration)
+      val ssr = Await
+        .result(actor ? SystemStatusRequest, timeout.duration)
         .asInstanceOf[SystemStatusResponse]
 
       ssr.elevatorStates.count(_.goals == Seq(1, 5)) should be(1)
@@ -208,7 +218,8 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
       actor ! PickupRequest(5, Up)
       Thread.sleep(100)
 
-      val ssr = Await.result(actor ? SystemStatusRequest, timeout.duration)
+      val ssr = Await
+        .result(actor ? SystemStatusRequest, timeout.duration)
         .asInstanceOf[SystemStatusResponse]
 
       ssr.elevatorStates.count(_.goals == Seq(1, 5)) should be(1)
@@ -238,19 +249,19 @@ class SystemActorTest(_system: ActorSystem) extends TestKit(_system) with Implic
       actor ! PickupRequest(7, Up)
       actor ! PickupRequest(9, Up)
       Thread.sleep(100)
-      
+
       doSteps(actor, 10)
       Thread.sleep(100)
 
       actor ! PickupRequest(6, Down)
       Thread.sleep(100)
 
-      val ssr = Await.result(actor ? SystemStatusRequest, timeout.duration)
+      val ssr = Await
+        .result(actor ? SystemStatusRequest, timeout.duration)
         .asInstanceOf[SystemStatusResponse]
 
-      Seq(5, 7) should contain(ssr.elevatorStates.find(_.goals == Seq(6)).get.floor)
+      Seq(5, 7) should contain(
+        ssr.elevatorStates.find(_.goals == Seq(6)).get.floor)
     }
   }
 }
-
-

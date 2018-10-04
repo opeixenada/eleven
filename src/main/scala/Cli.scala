@@ -1,5 +1,6 @@
-import scala.concurrent.ExecutionContext.Implicits.global
+import solutions.imperative.ElevatorSystem
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /** Very basic CLI for `ElevatorSystem`. */
 object Cli extends App {
@@ -9,7 +10,7 @@ object Cli extends App {
 
   private def doSomething(smth: ElevatorSystem => Unit) = system match {
     case Some(s) => smth(s)
-    case _ => println("System is not initialized")
+    case _       => println("System is not initialized")
   }
 
   locally {
@@ -29,7 +30,8 @@ object Cli extends App {
       try {
         cmnd.split(" ").toList match {
           case "init" :: numElevators :: numFloors :: Nil =>
-            system = Option(new ElevatorSystem(numElevators.toInt, numFloors.toInt))
+            system =
+              Option(new ElevatorSystem(numElevators.toInt, numFloors.toInt))
             Thread.sleep(100)
             system.foreach(_.statusDescription().foreach(println(_)))
 
@@ -64,8 +66,7 @@ object Cli extends App {
 
           case _ => println(s"Unknown command: $cmnd")
         }
-      }
-      catch {
+      } catch {
         case e: Exception =>
           println(s"Failed to execute: $cmnd")
           println(e)

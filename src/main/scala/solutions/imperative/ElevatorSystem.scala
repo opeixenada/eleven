@@ -1,21 +1,23 @@
-import actors.SystemActor
+package solutions.imperative
+
 import akka.actor.{ActorSystem, Props}
 import akka.pattern._
 import akka.util.Timeout
-import model.Directions
-import model.Messages._
+import models._
+import solutions.imperative.actors.SystemActor
+import solutions.imperative.messages.{SystemStatusRequest, SystemStatusResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-
 
 class ElevatorSystem(numElevators: Int, numFloors: Int) {
 
   private val actorSystem = ActorSystem("ElevatorsSystem")
 
   private val elevatorsController = actorSystem.actorOf(
-    Props(new SystemActor(numElevators, numFloors)), "ElevatorsController")
+    Props(new SystemActor(numElevators, numFloors)),
+    "ElevatorsController")
 
   /** Perform 1 step of the simulation. */
   def step(): Unit = {
@@ -43,30 +45,7 @@ class ElevatorSystem(numElevators: Int, numFloors: Int) {
     implicit val timeout = Timeout(1.seconds)
     (elevatorsController ? SystemStatusRequest).map {
       case ssr: SystemStatusResponse =>
-        val elevatorsStatus = ssr.elevatorStates.sortBy(_.id).map { state =>
-          val route = if (state.goals.isEmpty) "" else s" -> ${state.goals.mkString(" -> ")}"
-
-          val lastDirection = state.lastDirection match {
-            case Some(d) => d
-            case _ => "[]"
-          }
-
-          val arrived = if (state.arrived) "Idle" else "Active"
-
-          Seq(s"${state.id}: ${state.floor}$route", arrived, lastDirection).mkString("; ")
-        }
-
-        elevatorsStatus.mkString("\n")
-
-        val queueLine = if (ssr.queue.nonEmpty) {
-          val qLine = ssr.queue.map { r => s"${r.floor}(${r.direction})" }.mkString(", ")
-          s"Queue: $qLine"
-        } else {
-          "Queue: empty"
-        }
-
-        (elevatorsStatus :+ queueLine).mkString("\n")
-
+        utils.statusDescription(ssr.elevatorStates, ssr.queue)
       case _ => "N/A"
     }
   }

@@ -1,7 +1,6 @@
-package model
+package models
 
-import model.Directions._
-
+import models.Directions._
 
 /**
   * Representation of the elevator's state.
@@ -14,8 +13,11 @@ import model.Directions._
   * @param arrived       `true` if elevator just arrived to its goal and has to spend one
   *                      simulation step being idle
   */
-case class ElevatorState(id: Int, floor: Int = 0, goals: Seq[Int] = Seq.empty,
-                         lastDirection: Option[Direction] = None, arrived: Boolean = false) {
+case class Elevator(id: Int,
+                    floor: Int = 0,
+                    goals: Seq[Int] = Seq.empty,
+                    lastDirection: Option[Direction] = None,
+                    arrived: Boolean = false) {
 
   /** Next goal floor towards which the elevator is moving. `None` if the elevator is idle. */
   lazy val nextGoal: Option[Int] = goals.headOption
@@ -33,7 +35,7 @@ case class ElevatorState(id: Int, floor: Int = 0, goals: Seq[Int] = Seq.empty,
     *
     * @return elevator's state in the next time step
     */
-  def next(): ElevatorState = {
+  def next(): Elevator = {
     (nextGoal, direction) match {
       case (None, _) =>
         // Elevator doesn't have any goals, stay still
@@ -52,11 +54,13 @@ case class ElevatorState(id: Int, floor: Int = 0, goals: Seq[Int] = Seq.empty,
 
         val nextLastDirection = (nextArrived, lastDirection, nextGoals) match {
           case (false, _, Nil) => None
-          case (_, d, _) => d
+          case (_, d, _)       => d
         }
 
-        this.copy(floor = nextFloor, goals = nextGoals, lastDirection = nextLastDirection,
-          arrived = nextArrived)
+        this.copy(floor = nextFloor,
+                  goals = nextGoals,
+                  lastDirection = nextLastDirection,
+                  arrived = nextArrived)
     }
   }
 
@@ -67,18 +71,19 @@ case class ElevatorState(id: Int, floor: Int = 0, goals: Seq[Int] = Seq.empty,
     * @param newDirection direction in which the passenger wants to go
     * @return new elevator's state with a goal added
     */
-  def addGoal(newFloor: Int, newDirection: Option[Direction]): ElevatorState = {
+  def addGoal(newFloor: Int, newDirection: Option[Direction]): Elevator = {
 
-    lazy val goalsInsertion = goals.foldLeft[(Seq[Int], Boolean)]((Seq(floor), false)) {
-      case ((floors, inserted), goal) =>
-        val floor1 = floors.last
-        if (!inserted && ((floor1 <= newFloor && newFloor <= goal) || (goal <= newFloor &&
-          newFloor <= floor1))) {
-          (floors :+ newFloor :+ goal, true)
-        } else {
-          (floors :+ goal, inserted)
-        }
-    }
+    lazy val goalsInsertion =
+      goals.foldLeft[(Seq[Int], Boolean)]((Seq(floor), false)) {
+        case ((floors, inserted), goal) =>
+          val floor1 = floors.last
+          if (!inserted && ((floor1 <= newFloor && newFloor <= goal) || (goal <= newFloor &&
+              newFloor <= floor1))) {
+            (floors :+ newFloor :+ goal, true)
+          } else {
+            (floors :+ goal, inserted)
+          }
+      }
 
     val newGoalDirection =
       if (floor == newFloor || goals.contains(newFloor)) {
@@ -92,8 +97,8 @@ case class ElevatorState(id: Int, floor: Int = 0, goals: Seq[Int] = Seq.empty,
         // end of the list
         val newGoals = goals :+ newFloor
         (newGoals, newDirection match {
-          case None => ElevatorState.directions(floor, newGoals).lastOption
-          case d => d
+          case None => Elevator.directions(floor, newGoals).lastOption
+          case d    => d
         })
       }
 
@@ -115,9 +120,11 @@ case class ElevatorState(id: Int, floor: Int = 0, goals: Seq[Int] = Seq.empty,
     * @param numFloors    number of floors in the system
     * @return `None` if the elevator is not suitable
     */
-  def suitability(reqFloor: Int, reqDirection: Direction, numFloors: Int): Option[Int] = {
+  def suitability(reqFloor: Int,
+                  reqDirection: Direction,
+                  numFloors: Int): Option[Int] = {
     if (arrived || isMovingAway(reqFloor) || willChangeDirection() ||
-      !direction.forall(_ == reqDirection)) {
+        !direction.forall(_ == reqDirection)) {
       None
     } else {
       Some(numFloors - math.abs(reqFloor - floor))
@@ -127,7 +134,8 @@ case class ElevatorState(id: Int, floor: Int = 0, goals: Seq[Int] = Seq.empty,
   /** Checks is the elevator is moving away from the given floor. */
   private def isMovingAway(requestFloor: Int): Boolean = {
     direction match {
-      case Some(d) => (floor > requestFloor && d == Up) || (floor < requestFloor && d == Down)
+      case Some(d) =>
+        (floor > requestFloor && d == Up) || (floor < requestFloor && d == Down)
       case _ => false
     }
   }
@@ -137,13 +145,13 @@ case class ElevatorState(id: Int, floor: Int = 0, goals: Seq[Int] = Seq.empty,
     * trajectory. `true` if direction will be changed at some point.
     */
   private def willChangeDirection(): Boolean = {
-    val directions = ElevatorState.directions(floor, goals) ++ lastDirection.toSeq
+    val directions = Elevator.directions(floor, goals) ++ lastDirection.toSeq
     directions.distinct.size > 1
   }
 
 }
 
-object ElevatorState {
+object Elevator {
   def directions(floor: Int, goals: Seq[Int]): Seq[Direction] = {
     (floor +: goals).zip(goals).map {
       case (floor1, floor2) => Directions(floor2 - floor1)

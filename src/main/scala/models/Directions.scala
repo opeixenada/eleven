@@ -1,5 +1,4 @@
-package model
-
+package models
 
 object Directions {
 
@@ -12,7 +11,7 @@ object Directions {
   def apply(direction: Int): Direction = if (direction < 0) Down else Up
 
   def unapply(direction: Direction): Int = direction match {
-    case Up => 1
+    case Up   => 1
     case Down => -1
   }
 }
